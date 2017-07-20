@@ -15,7 +15,11 @@ def output_to_csv(name, data):
     with open(name, 'wb') as f:
         w = csv.writer(f)
         w.writerow(['multisig_address', 'amount_in_wei'])
-        sorted_by_value = sorted(data.items(), key=operator.itemgetter(1), reverse=True)
+        sorted_by_value = sorted(
+            data.items(),
+            key=operator.itemgetter(1),
+            reverse=True
+        )
         w.writerows(sorted_by_value)
 
 
@@ -31,7 +35,11 @@ class Client():
         self.wallet_translator = ContractTranslator(wallet_abi)
 
     def get_block(self, num):
-        return self.client.call('eth_getBlockByNumber', quantity_encoder(num), True)
+        return self.client.call(
+            'eth_getBlockByNumber',
+            quantity_encoder(num),
+            True
+        )
 
     def decode_execute(self, txdata):
         # get rid of signature and 0x
@@ -46,7 +54,8 @@ class Client():
         amount_in_wei = decode_abi(['uint256'], txdata.decode('hex')[32:64])[0]
 
         # Reason pyethapp full decoding does not work is for some input
-        # the bytes decoding fails with AssertionError: Wrong data size for string/bytes object
+        # the bytes decoding fails with
+        # AssertionError: Wrong data size for string/bytes object
         # TODO: Report bug ...
         try:
             data = decode_abi(['bytes'], txdata.decode('hex')[64:])[0]
@@ -62,7 +71,6 @@ if __name__ == "__main__":
     c = Client()
     whitehat = "0x1dba1131000664b884a1ba238464159892252d3a"
     start_block = 4044976
-    # end_block = start_block + 100  # it's more but just for testing
     end_block = 4048770
     blocknum = start_block
     mapping = defaultdict(int)
@@ -77,9 +85,6 @@ if __name__ == "__main__":
                 tx['input'].startswith('0xb61d27f6')
             )
             if is_whitehat_execute:
-                # print("Got IN")
-                # print("HASH: {}".format(tx['hash']))
-                # print("Input: {}".format(c.decode_execute(tx['input'])))
                 sent_to, wei, data = c.decode_execute(tx['input'])
                 mapping[tx['to']] += wei
 
