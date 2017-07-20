@@ -69,7 +69,7 @@ if __name__ == "__main__":
     print('Verification Started')
     while blocknum <= end_block:
         print('Processing block: {}'.format(blocknum))
-        
+
         transactions = c.get_block(blocknum)['transactions']
         for tx in transactions:
             is_whitehat_execute = (
