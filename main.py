@@ -6,7 +6,8 @@ from ethereum.abi import ContractTranslator, decode_abi
 from pyethapp.rpc_client import JSONRPCClient
 from pyethapp.jsonrpc import quantity_encoder
 
-from constants import wallet_abi
+from constants import wallet_abi, results_file
+
 host = "127.0.0.1"
 port = 8545
 WHITEHAT = "0x1dba1131000664b884a1ba238464159892252d3a"
@@ -180,6 +181,5 @@ if __name__ == "__main__":
 
         blocknum += 1
 
-    filename = 'multisig_data.csv'
-    mapping.output_to_csv(filename)
-    print('Verification ended. Written file: {}'.format(filename))
+    mapping.output_to_csv(results_file)
+    print('Verification ended. Written file: {}'.format(results_file))
