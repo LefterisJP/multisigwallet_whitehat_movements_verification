@@ -26,7 +26,7 @@ multisig_address,amount_in_wei,NEVERDIE,DAO.Casino,1ST,ADST,ADT,ADX,ANT,ARC,BAT,
 It is the address of the multisig, the amount of moved ether in WEI and then followed by the moved wei-equivalent token balances for all the known tokens. This data considers `start_block` as `4044976` and `end_block` as `4048770`.
 
 
-The `big_xxx.csv` file corresponds to movements by the big whitehat address: `0x1dba1131000664b884a1ba238464159892252d3a' and the `small_xxx.csv` corresponds to movements by other smaller addresses known to be whitehat and planning to return funds.
+The `big_xxx.csv` file corresponds to movements by the big whitehat address: `0x1dba1131000664b884a1ba238464159892252d3a` and the `small_xxx.csv` corresponds to movements by other smaller addresses known to be whitehat and planning to return funds.
 
 These other addresses are:
 
