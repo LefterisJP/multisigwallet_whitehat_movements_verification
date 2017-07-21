@@ -56,12 +56,15 @@ class Mapping():
         else:
             self.mapping[address]['ether'] = self.mapping[address]['ether'] + value
 
-    def add_token(self, address, token_name, value):
+    def add_token(self, address, token_address, value):
+        if not token_address.startswith('0x'):
+            token_address = '0x' + token_address
         if address not in self.mapping:
             self.mapping[address] = dict()
-            self.mapping[address][token_name] = value
+            self.mapping[address][token_address] = value
         else:
-            self.mapping[address][token_name] = self.mapping[address][token_name] + value
+            prev_value = self.mapping[address].get(token_address, 0)
+            self.mapping[address][token_address] = prev_value + value
 
     def output_to_csv(self, name):
         with open(name, 'wb') as f:
@@ -73,17 +76,19 @@ class Mapping():
 
             w.writerow(header_row)
             data = list()
-            for address, map_data in self.mapping.iteritems():
-                entry = [address, map_data['ether']]
+            for multisigaddress, map_data in self.mapping.iteritems():
+                entry = [multisigaddress, map_data.get('ether', 0)]
                 for token_data in self.tokens.tokens_list:
-                    if token_data['symbol'] in self.mapping[address]:
-                        decimal = 18 - token_data['decimal']
-                        value = self.mapping[address][token_data['symbol']] / (10 ** decimal)
+                    token_address = token_data['address'].lower()
+                    if token_address in self.mapping[multisigaddress]:
+                        # No need to calculate decimal value
+                        value = self.mapping[multisigaddress][token_address]
                         entry.append(value)
                     else:
                         entry.append(0)
                 data.append(tuple(entry))
 
+            # sort by ETH value
             sorted_data = sorted(data, key=lambda tup: tup[1], reverse=True)
             w.writerows(sorted_data)
 
@@ -112,7 +117,7 @@ class Client():
 
     def decode_token_transfer(self, txdata, to_address):
         if len(txdata) < 8 or txdata[:8] != 'a9059cbb':
-            return None, None
+            return None
 
         # get rid of signature
         txdata = txdata[8:]
@@ -122,7 +127,7 @@ class Client():
         token_name = self.tokens.address_is_token(to_address)
         if token_name is None:
             print('WARNING: Unknown token {} transferred'.format(to_address))
-            return None, None
+            token_name = 'UNKNOWN'
 
         hexdata = txdata.decode('hex')
         transfer_to = decode_abi(['address'], hexdata[:32])[0]
@@ -156,8 +161,7 @@ if __name__ == "__main__":
     mapping = Mapping(tokens)
 
     start_block = 4044976
-    # end_block = 4048770
-    end_block = start_block + 100
+    end_block = 4048770
     blocknum = start_block
     print('Verification Started')
     while blocknum <= end_block:
@@ -170,11 +174,11 @@ if __name__ == "__main__":
                 tx['input'].startswith('0xb61d27f6')
             )
             if is_whitehat_execute:
-                sent_to, wei, token_from, token_value = c.decode_execute(tx['input'])
-                if token_from is None:
+                sent_to, wei, token_value = c.decode_execute(tx['input'])
+                if token_value is None:
                     mapping.add_eth(tx['to'], wei)
                 else:
-                    mapping.add_token(sent_to, token_value)
+                    mapping.add_token(tx['to'], sent_to, token_value)
 
         blocknum += 1
 
