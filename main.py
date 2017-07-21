@@ -1,8 +1,6 @@
 import json
-import operator
 import csv
 import string
-from collections import defaultdict
 
 from ethereum.abi import ContractTranslator, decode_abi
 from pyethapp.rpc_client import JSONRPCClient
