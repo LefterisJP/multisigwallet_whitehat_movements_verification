@@ -1,3 +1,4 @@
+import json
 import operator
 import csv
 from collections import defaultdict
@@ -21,6 +22,30 @@ def output_to_csv(name, data):
             reverse=True
         )
         w.writerows(sorted_by_value)
+
+
+class TokenHolder():
+
+    def __init__(self, filename):
+        self.tokens = self.load_tokens(filename)
+
+    def load_tokens(self, filename):
+        with open(filename, 'r') as f:
+            tokens = json.loads(f.read())
+
+        cleaned_tokens = dict()
+        for token in tokens:
+            cleaned_tokens[token['address'].lower()] = token
+
+        return cleaned_tokens
+
+    def address_is_token(self, address):
+        address = address.lower()
+        token_name = None
+        if address in self.tokens:
+            token_name = self.tokens[address]
+
+        return token_name
 
 
 class Client():
@@ -69,6 +94,8 @@ class Client():
 
 if __name__ == "__main__":
     c = Client()
+    tokens = TokenHolder('tokens.json')
+
     whitehat = "0x1dba1131000664b884a1ba238464159892252d3a"
     start_block = 4044976
     end_block = 4048770
