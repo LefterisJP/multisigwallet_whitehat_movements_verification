@@ -11,7 +11,7 @@ from constants import wallet_abi, results_file, BIG_WHITEHAT, SMALL_WHITEHATS
 host = "127.0.0.1"
 port = 8545
 printable = set(string.printable)
-
+OMIT_ZERO_OR_FAILED__TRANSFERS = True
 
 class TokenHolder():
 
@@ -94,6 +94,21 @@ class Mapping():
             raise ValueError('Unknown whitehat type: {}'.format(target))
 
     def _output_to_csv(self, name, mapping):
+        if OMIT_ZERO_OR_FAILED__TRANSFERS:
+            keys_to_del = list()
+            for key, values in mapping.iteritems():
+                value_found = False
+                for token, value in values.iteritems():
+                    if value != 0:
+                        value_found = True
+                        break
+
+                if not value_found:
+                    keys_to_del.append(key)
+
+            for key in keys_to_del:
+                del mapping[key]
+
         with open(name, 'wb') as f:
             w = csv.writer(f)
             header_row = ['multisig_address', 'amount_in_wei']
